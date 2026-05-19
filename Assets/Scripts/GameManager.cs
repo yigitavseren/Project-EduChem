@@ -21,6 +21,11 @@ public class GameManager : MonoBehaviour
     public TextMeshProUGUI kartNetlerText;
     public TextMeshProUGUI kartGelirText;
 
+    [Header("Öðrenci Listesi Paneli")]
+    public GameObject ogrenciListesiPaneli; // Ana panelimiz
+    public Transform ogrenciListesiContent; // Scroll View içindeki Content objesi
+    public GameObject ogrenciSatiriPrefab;  // Az önce yaptýðýmýz Prefab
+
     [Header("Dershane & Laboratuvar Ýstatistikleri")]
     public int kasa = 5000;
     public int kacinciGun = 1;
@@ -196,6 +201,62 @@ public class GameManager : MonoBehaviour
         supheSeviyesi += 2;
 
         ArayuzuGuncelle();
+    }
+
+    public void OgrenciListesiniGuncelle()
+    {
+        // Önce listedeki eski satýrlarý temizleyelim
+        foreach (Transform child in ogrenciListesiContent)
+        {
+            Destroy(child.gameObject);
+        }
+
+        // Dershanedeki her bir öðrenci için yeni bir satýr üret
+        foreach (Student ogr in dershanedekiOgrenciler)
+        {
+            // Kalýptan yeni bir satýr oluþtur ve Content'in içine koy
+            GameObject yeniSatir = Instantiate(ogrenciSatiriPrefab, ogrenciListesiContent);
+
+            // Ýçindeki Text'leri sýrasýyla bul
+            TextMeshProUGUI[] yazilar = yeniSatir.GetComponentsInChildren<TextMeshProUGUI>();
+
+            yazilar[0].text = ogr.isim;
+            yazilar[1].text = "Alan: " + ogr.alan.ToString();
+            yazilar[2].text = "Gelir: " + ogr.gelirKatkisi + " TL/Gün";
+
+            // Çocuðun alanýna göre 4. Text'e (Netler) yazýlacak metni belirle
+            string netYazisi = "";
+            if (ogr.alan == OgrenciAlani.Sayisal)
+            {
+                netYazisi = $"Mat: {ogr.matNet} | Fiz: {ogr.fizikNet} | Kim: {ogr.kimyaNet} | Biyo: {ogr.biyoNet}";
+            }
+            else if (ogr.alan == OgrenciAlani.EsitAgirlik)
+            {
+                netYazisi = $"Tür: {ogr.turkceNet} | Mat: {ogr.matNet}";
+            }
+            else if (ogr.alan == OgrenciAlani.Sozel)
+            {
+                netYazisi = $"Tür: {ogr.turkceNet} | Tar: {ogr.tarihNet} | Coð: {ogr.cogNet} | Fel: {ogr.felsefeNet}";
+            }
+
+            yazilar[3].text = netYazisi; // 4. Text'e netleri basýyoruz
+        }
+    }
+
+    public void OgrenciListesiniAcKapat()
+    {
+        // Eðer mülakat paneli açýksa, öðrenci listesini açmaya izin verme (karýþmasýnlar)
+        if (adayPaneli.activeSelf) return;
+
+        // Panelin durumunu tersine çevir (Açýksa kapat, kapalýysa aç)
+        bool suAnkiDurum = ogrenciListesiPaneli.activeSelf;
+        ogrenciListesiPaneli.SetActive(!suAnkiDurum);
+
+        // Eðer paneli þu an açýyorsak, listeyi de baþtan çizelim ki yeni çocuklar eklensin
+        if (!suAnkiDurum)
+        {
+            OgrenciListesiniGuncelle();
+        }
     }
 
     void ArayuzuGuncelle()
