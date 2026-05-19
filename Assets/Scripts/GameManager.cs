@@ -26,6 +26,13 @@ public class GameManager : MonoBehaviour
     public Transform ogrenciListesiContent; // Scroll View içindeki Content objesi
     public GameObject ogrenciSatiriPrefab;  // Az önce yaptýðýmýz Prefab
 
+    [Header("Laboratuvar ve Ýksir Sistemi")]
+    public GameObject laboratuvarPaneli;
+    public TextMeshProUGUI odakSurubuText; // "Sahip Olunan..." yazýsýný buraya baðlayacaðýz
+
+    private int odakSurubuSayisi = 0; // Elimizdeki toplam iksir miktarý
+    private int iksirMaliyeti = 100;  // 1 adet iksirin fiyatý
+
     [Header("Dershane & Laboratuvar Ýstatistikleri")]
     public int kasa = 5000;
     public int kacinciGun = 1;
@@ -256,6 +263,45 @@ public class GameManager : MonoBehaviour
         if (!suAnkiDurum)
         {
             OgrenciListesiniGuncelle();
+        }
+    }
+
+    public void OdakSurubuUret()
+    {
+        // Kasada yeterli para var mý kontrol et
+        if (kasa >= iksirMaliyeti)
+        {
+            kasa -= iksirMaliyeti; // Parayý düþ
+            odakSurubuSayisi++;         // Ýksiri ekle
+
+            // Ekrandaki yazýlarý anlýk güncelle
+            ArayuzuGuncelle(); // Zaten yazdýðýn para güncelleme fonksiyonu (adý farklýysa ona göre deðiþtir)
+            LaboratuvarUITemizle();
+
+            Debug.Log("Kimyasal baþarýyla kaynatýldý! Yeni Ýksir Üretildi.");
+        }
+        else
+        {
+            Debug.Log("Kasa tam takýr! Ýksir üretecek para yok.");
+            // Ýleride buraya "Paran Yok!" uyarý penceresi çakarýz
+        }
+    }
+
+    public void LaboratuvarUITemizle()
+    {
+        odakSurubuText.text = "Sahip Olunan Odak\nÞurubu: " + odakSurubuSayisi;
+    }
+
+    public void LaboratuvarPaneliAcKapat()
+    {
+        if (adayPaneli.activeSelf) return; // Mülakat varken açýlmasýn
+
+        bool suAnkiDurum = laboratuvarPaneli.activeSelf;
+        laboratuvarPaneli.SetActive(!suAnkiDurum);
+
+        if (!suAnkiDurum)
+        {
+            LaboratuvarUITemizle(); // Panel açýlýrken güncel miktarý yazsýn
         }
     }
 
