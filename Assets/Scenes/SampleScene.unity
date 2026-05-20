@@ -131,7 +131,7 @@ GameObject:
   - component: {fileID: 103701121}
   - component: {fileID: 103701120}
   m_Layer: 5
-  m_Name: GelirText
+  m_Name: IncomeText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -157,7 +157,9 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Gelir
+  m_text: 'Income
+
+'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -268,7 +270,7 @@ GameObject:
   - component: {fileID: 135730892}
   - component: {fileID: 135730891}
   m_Layer: 5
-  m_Name: "Iks\u0131r\u0130cirButonu"
+  m_Name: LaboratoryButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -340,7 +342,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 258484206}
         m_TargetAssemblyTypeName: GameManager, Assembly-CSharp
-        m_MethodName: LaboratuvarPaneliAcKapat
+        m_MethodName: ToggleLaboratoryPanel
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -417,34 +419,34 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ee19ba821d4d4be49a24db650fca3bc5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  kasaText: {fileID: 989757663}
-  gunText: {fileID: 677939602}
-  supheText: {fileID: 951393125}
-  iksirText: {fileID: 1024282837}
-  ogrenciText: {fileID: 854284783}
-  basariText: {fileID: 766506757}
-  adayPaneli: {fileID: 266752159}
-  kartArkaplan: {fileID: 1637796851}
-  kartIsimText: {fileID: 1830022432}
-  kartAlanText: {fileID: 702085584}
-  kartNetlerText: {fileID: 1597989084}
-  kartGelirText: {fileID: 103701120}
-  ogrenciListesiPaneli: {fileID: 1611775424}
-  ogrenciListesiContent: {fileID: 1017202110}
-  ogrenciSatiriPrefab: {fileID: 1891714234069935358, guid: 6a6cfedd04d258540a27354bf9863c70, type: 3}
-  laboratuvarPaneli: {fileID: 2144707183}
-  odakSurubuText: {fileID: 814838112}
-  kasa: 5000
-  kacinciGun: 1
-  supheSeviyesi: 0
-  gizliLaboratuvarGideri: 500
-  iksirStogu: 0
-  ogrenciSayisi: 0
-  basariOrani: 10
-  dershanedekiOgrenciler: []
-  kapidakiAdaylar: []
-  uretimMaliyeti: 300
-  uretimRiski: 15
+  moneyText: {fileID: 989757663}
+  dayText: {fileID: 677939602}
+  suspicionText: {fileID: 951393125}
+  potionText: {fileID: 1024282837}
+  studentText: {fileID: 854284783}
+  successText: {fileID: 766506757}
+  candidatePanel: {fileID: 266752159}
+  cardBackground: {fileID: 1637796851}
+  cardNameText: {fileID: 1830022432}
+  cardFieldText: {fileID: 702085584}
+  cardScoresText: {fileID: 1597989084}
+  cardIncomeText: {fileID: 103701120}
+  studentListPanel: {fileID: 1611775424}
+  studentListContent: {fileID: 1017202110}
+  studentRowPrefab: {fileID: 1891714234069935358, guid: 6a6cfedd04d258540a27354bf9863c70, type: 3}
+  laboratoryPanel: {fileID: 2144707183}
+  focusSyrupText: {fileID: 814838112}
+  money: 5000
+  currentDay: 1
+  suspicionLevel: 0
+  secretLabExpense: 500
+  potionStock: 0
+  studentCount: 0
+  successRate: 10
+  enrolledStudents: []
+  waitingCandidates: []
+  productionCost: 300
+  productionRisk: 15
 --- !u!4 &258484207
 Transform:
   m_ObjectHideFlags: 0
@@ -472,12 +474,12 @@ GameObject:
   - component: {fileID: 266752162}
   - component: {fileID: 266752161}
   m_Layer: 5
-  m_Name: AdayPaneli
+  m_Name: CandidatePanel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &266752160
 RectTransform:
   m_ObjectHideFlags: 0
@@ -675,7 +677,7 @@ GameObject:
   - component: {fileID: 377228725}
   - component: {fileID: 377228724}
   m_Layer: 5
-  m_Name: RedButonu
+  m_Name: RejectButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -747,7 +749,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 258484206}
         m_TargetAssemblyTypeName: GameManager, Assembly-CSharp
-        m_MethodName: AdayiReddet
+        m_MethodName: RejectCandidate
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -883,7 +885,7 @@ GameObject:
   - component: {fileID: 470942312}
   - component: {fileID: 470942311}
   m_Layer: 5
-  m_Name: KabulButonu
+  m_Name: AcceptButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -955,7 +957,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 258484206}
         m_TargetAssemblyTypeName: GameManager, Assembly-CSharp
-        m_MethodName: AdayiKabulEt
+        m_MethodName: AcceptCandidate
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -1060,7 +1062,9 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "G\xFCn\xFC Bitir"
+  m_text: 'End Day
+
+'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -1152,7 +1156,7 @@ GameObject:
   - component: {fileID: 502584803}
   - component: {fileID: 502584802}
   m_Layer: 5
-  m_Name: UretimButonu
+  m_Name: CraftButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1224,7 +1228,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 258484206}
         m_TargetAssemblyTypeName: GameManager, Assembly-CSharp
-        m_MethodName: OdakSurubuUret
+        m_MethodName: ProduceFocusSyrup
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -1466,7 +1470,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Reddet
+  m_text: Reject
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -1558,7 +1562,7 @@ GameObject:
   - component: {fileID: 582124876}
   - component: {fileID: 582124875}
   m_Layer: 5
-  m_Name: LaboratuvardaUret
+  m_Name: StudentsButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1630,7 +1634,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 258484206}
         m_TargetAssemblyTypeName: GameManager, Assembly-CSharp
-        m_MethodName: OgrenciListesiniAcKapat
+        m_MethodName: ToggleStudentListPanel
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -1774,7 +1778,7 @@ GameObject:
   - component: {fileID: 677939601}
   - component: {fileID: 677939602}
   m_Layer: 5
-  m_Name: GunYazisi
+  m_Name: DayText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1827,7 +1831,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "G\xFCn"
+  m_text: Day
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -1910,7 +1914,7 @@ GameObject:
   - component: {fileID: 702085583}
   - component: {fileID: 702085584}
   m_Layer: 5
-  m_Name: AlanText
+  m_Name: FieldText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1963,7 +1967,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Alan
+  m_text: Field
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -2046,7 +2050,7 @@ GameObject:
   - component: {fileID: 766506758}
   - component: {fileID: 766506757}
   m_Layer: 5
-  m_Name: BasariYazisi
+  m_Name: ScoreText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2072,7 +2076,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "Ba\u015Far\u0131 "
+  m_text: Score
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -2182,7 +2186,7 @@ GameObject:
   - component: {fileID: 814838113}
   - component: {fileID: 814838112}
   m_Layer: 5
-  m_Name: SahipOlunanSurup
+  m_Name: PotionStockText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2318,7 +2322,7 @@ GameObject:
   - component: {fileID: 854284782}
   - component: {fileID: 854284783}
   m_Layer: 5
-  m_Name: OgrenciYazisi
+  m_Name: EnrolledText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2371,7 +2375,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\xD6\u011Frenci "
+  m_text: Enrolled
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -2454,7 +2458,7 @@ GameObject:
   - component: {fileID: 951393126}
   - component: {fileID: 951393125}
   m_Layer: 5
-  m_Name: SupheYazisi
+  m_Name: SuspicionText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2480,7 +2484,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\u015E\xFCphe"
+  m_text: Suspicion
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -2590,7 +2594,7 @@ GameObject:
   - component: {fileID: 989757664}
   - component: {fileID: 989757663}
   m_Layer: 5
-  m_Name: KasaYazisi
+  m_Name: SafeText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2635,9 +2639,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'Kasa
-
-'
+  m_text: Safe
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -2884,7 +2886,7 @@ GameObject:
   - component: {fileID: 1024282838}
   - component: {fileID: 1024282837}
   m_Layer: 5
-  m_Name: "\u0130ksirYazisi"
+  m_Name: PotionsText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2929,7 +2931,9 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\u0130ksir"
+  m_text: 'Potions
+
+'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -3171,7 +3175,10 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'Laboratuvar
+  m_text: '
+
+    Laboratory
+
 
 '
   m_isRightToLeft: 0
@@ -3309,7 +3316,12 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\xD6\u011Frenciler\n"
+  m_text: '
+
+    Students
+
+
+'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -3635,7 +3647,7 @@ GameObject:
   - component: {fileID: 1387890363}
   - component: {fileID: 1387890362}
   m_Layer: 5
-  m_Name: GunBitirButonu
+  m_Name: EndDayButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3707,7 +3719,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 258484206}
         m_TargetAssemblyTypeName: GameManager, Assembly-CSharp
-        m_MethodName: GunuBitir
+        m_MethodName: EndDay
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -3767,7 +3779,7 @@ GameObject:
   - component: {fileID: 1597989083}
   - component: {fileID: 1597989084}
   m_Layer: 5
-  m_Name: NetlerText
+  m_Name: ScoresText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3820,7 +3832,9 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Netler
+  m_text: 'Scores
+
+'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -3903,7 +3917,7 @@ GameObject:
   - component: {fileID: 1611775427}
   - component: {fileID: 1611775426}
   m_Layer: 5
-  m_Name: OgrenciListesiPaneli
+  m_Name: StudentListPanel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3979,7 +3993,7 @@ GameObject:
   - component: {fileID: 1637796850}
   - component: {fileID: 1637796851}
   m_Layer: 5
-  m_Name: OgrenciKarti
+  m_Name: StudentCard
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4105,7 +4119,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "Odak \u015Eurubu \xDCret (Maliyet:100 TL)"
+  m_text: Focus Syrup Produce
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -4197,7 +4211,7 @@ GameObject:
   - component: {fileID: 1687471920}
   - component: {fileID: 1687471922}
   m_Layer: 5
-  m_Name: UstBar
+  m_Name: TopBar
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4349,7 +4363,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Kabul Et
+  m_text: Accept
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -4440,7 +4454,7 @@ GameObject:
   - component: {fileID: 1766818222}
   - component: {fileID: 1766818221}
   m_Layer: 5
-  m_Name: AltBar
+  m_Name: BottomBar
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4518,7 +4532,7 @@ GameObject:
   - component: {fileID: 1830022431}
   - component: {fileID: 1830022432}
   m_Layer: 5
-  m_Name: IsimText
+  m_Name: NameText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4571,7 +4585,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\u0130sim"
+  m_text: Name
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -4654,7 +4668,7 @@ GameObject:
   - component: {fileID: 2144707186}
   - component: {fileID: 2144707185}
   m_Layer: 5
-  m_Name: LaboratuvarPaneli
+  m_Name: LaboratoryPanel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

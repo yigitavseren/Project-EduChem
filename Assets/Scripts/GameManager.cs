@@ -1,318 +1,317 @@
 using UnityEngine;
 using System.Collections.Generic;
 using TMPro;
-using UnityEngine.UI; // YENÝ: Kartýn rengini (Sayýsal/Sözel) deðiþtirmek için bunu ekledik
+using UnityEngine.UI; // NEW: Added to change the card's background color (Science/Humanities)
 
 public class GameManager : MonoBehaviour
 {
-    [Header("Arayüz (UI) Elementleri")]
-    public TextMeshProUGUI kasaText;
-    public TextMeshProUGUI gunText;
-    public TextMeshProUGUI supheText;
-    public TextMeshProUGUI iksirText;
-    public TextMeshProUGUI ogrenciText;
-    public TextMeshProUGUI basariText;
+    [Header("UI Elements")]
+    public TextMeshProUGUI moneyText;
+    public TextMeshProUGUI dayText;
+    public TextMeshProUGUI suspicionText;
+    public TextMeshProUGUI potionText;
+    public TextMeshProUGUI studentText;
+    public TextMeshProUGUI successText;
 
-    [Header("Öðrenci Kabul Paneli (YENÝ EKLENENLER)")]
-    public GameObject adayPaneli;           // Panelin kendisi (açýp kapatmak için)
-    public Image kartArkaplan;              // Renk deðiþtirecek olan kartýn resmi
-    public TextMeshProUGUI kartIsimText;
-    public TextMeshProUGUI kartAlanText;
-    public TextMeshProUGUI kartNetlerText;
-    public TextMeshProUGUI kartGelirText;
+    [Header("Student Admission Panel (NEW ADDITIONS)")]
+    public GameObject candidatePanel;           // The panel itself (to toggle on/off)
+    public Image cardBackground;                // The card image that will change color
+    public TextMeshProUGUI cardNameText;
+    public TextMeshProUGUI cardFieldText;
+    public TextMeshProUGUI cardScoresText;
+    public TextMeshProUGUI cardIncomeText;
 
-    [Header("Öðrenci Listesi Paneli")]
-    public GameObject ogrenciListesiPaneli; // Ana panelimiz
-    public Transform ogrenciListesiContent; // Scroll View içindeki Content objesi
-    public GameObject ogrenciSatiriPrefab;  // Az önce yaptýðýmýz Prefab
+    [Header("Student List Panel")]
+    public GameObject studentListPanel;         // Our main panel
+    public Transform studentListContent;        // Content object inside Scroll View
+    public GameObject studentRowPrefab;         // The Prefab we created earlier
 
-    [Header("Laboratuvar ve Ýksir Sistemi")]
-    public GameObject laboratuvarPaneli;
-    public TextMeshProUGUI odakSurubuText; // "Sahip Olunan..." yazýsýný buraya baðlayacaðýz
+    [Header("Laboratory and Potion System")]
+    public GameObject laboratoryPanel;
+    public TextMeshProUGUI focusSyrupText;      // We will link the "Owned..." text here
 
-    private int odakSurubuSayisi = 0; // Elimizdeki toplam iksir miktarý
-    private int iksirMaliyeti = 100;  // 1 adet iksirin fiyatý
+    private int focusSyrupCount = 0;            // Total potions we have
+    private int potionCost = 100;               // Price of 1 potion
 
-    [Header("Dershane & Laboratuvar Ýstatistikleri")]
-    public int kasa = 5000;
-    public int kacinciGun = 1;
-    public int supheSeviyesi = 0;
-    public int gizliLaboratuvarGideri = 500;
-    public int iksirStogu = 0;
-    public int ogrenciSayisi = 0;
-    public int basariOrani = 10;
+    [Header("Academy & Lab Statistics")]
+    public int money = 5000;
+    public int currentDay = 1;
+    public int suspicionLevel = 0;
+    public int secretLabExpense = 500;
+    public int potionStock = 0;
+    public int studentCount = 0;
+    public int successRate = 10;
 
-    [Header("Öðrenci Listesi")]
-    public List<Student> dershanedekiOgrenciler = new List<Student>();
-    public List<Student> kapidakiAdaylar = new List<Student>();
-    private Student suAnGosterilenAday; // YENÝ: O an ekranda kartý olan çocuk
+    [Header("Student Roster")]
+    public List<Student> enrolledStudents = new List<Student>();
+    public List<Student> waitingCandidates = new List<Student>();
+    private Student currentlyDisplayedCandidate; // NEW: The kid whose card is currently on screen
 
-    [Header("Üretim Ayarlarý")]
-    public int uretimMaliyeti = 300;
-    public int uretimRiski = 15;
+    [Header("Production Settings")]
+    public int productionCost = 300;
+    public int productionRisk = 15;
 
-    private bool oyunBittiMi = false;
+    private bool isGameOver = false;
 
     void Start()
     {
-        ArayuzuGuncelle();
-        // YENÝ: Oyun baþlarken panel ekranda kalmasýn, gizlensin
-        if (adayPaneli != null) adayPaneli.SetActive(false);
+        UpdateUI();
+        // NEW: Hide the panel when the game starts so it doesn't stay on screen
+        if (candidatePanel != null) candidatePanel.SetActive(false);
     }
 
-    public void GunuBitir()
+    public void EndDay()
     {
-        if (oyunBittiMi) return;
+        if (isGameOver) return;
 
-        kacinciGun++;
+        currentDay++;
 
-        kasa += (ogrenciSayisi * 100);
-        kasa -= gizliLaboratuvarGideri;
+        money += (studentCount * 100);
+        money -= secretLabExpense;
 
-        ogrenciSayisi += (basariOrani / 10);
+        studentCount += (successRate / 10);
 
-        if (supheSeviyesi > 0)
+        if (suspicionLevel > 0)
         {
-            supheSeviyesi -= 5;
-            if (supheSeviyesi < 0) supheSeviyesi = 0;
+            suspicionLevel -= 5;
+            if (suspicionLevel < 0) suspicionLevel = 0;
         }
 
-        if (kasa <= 0)
+        if (money <= 0)
         {
-            kasaText.text = "ÝFLAS ETTÝN!";
-            oyunBittiMi = true;
+            moneyText.text = "BANKRUPT!";
+            isGameOver = true;
             return;
         }
 
-        kapidakiAdaylar.Clear();
+        waitingCandidates.Clear();
         for (int i = 0; i < 3; i++)
         {
-            kapidakiAdaylar.Add(new Student(basariOrani));
+            waitingCandidates.Add(new Student(successRate));
         }
 
-        foreach (Student ogr in dershanedekiOgrenciler)
+        foreach (Student student in enrolledStudents)
         {
-            kasa += ogr.gelirKatkisi;
+            money += student.incomeContribution;
         }
 
-        // YENÝ: Gün bitince kapýdaki adaylarý göstermek için paneli açýyoruz
-        if (adayPaneli != null)
+        // NEW: Open the panel to show candidates at the door when the day ends
+        if (candidatePanel != null)
         {
-            adayPaneli.SetActive(true);
-            SiradakiAdayiGoster();
+            candidatePanel.SetActive(true);
+            ShowNextCandidate();
         }
 
-        ArayuzuGuncelle();
+        UpdateUI();
     }
 
-    // --- YENÝ EKLENEN PANEL FONKSÝYONLARI BURADAN BAÞLIYOR ---
-    public void SiradakiAdayiGoster()
+    // --- NEWLY ADDED PANEL FUNCTIONS START HERE ---
+    public void ShowNextCandidate()
     {
-        if (kapidakiAdaylar.Count > 0)
+        if (waitingCandidates.Count > 0)
         {
-            suAnGosterilenAday = kapidakiAdaylar[0]; // Listeden ilk çocuðu al
+            currentlyDisplayedCandidate = waitingCandidates[0]; // Get the first kid from the list
 
-            kartIsimText.text = suAnGosterilenAday.isim;
-            kartGelirText.text = "Beklenen Gelir: " + suAnGosterilenAday.gelirKatkisi + " TL/Gün";
+            cardNameText.text = currentlyDisplayedCandidate.studentName;
+            cardIncomeText.text = "Expected Income: " + currentlyDisplayedCandidate.incomeContribution + " TL/Day";
 
-            // Çocuðun alanýna göre Rengi ve Netleri ayarla
-            // Çocuðun alanýna göre Rengi ve Netleri ayarla
-            if (suAnGosterilenAday.alan == OgrenciAlani.Sayisal)
+            // Set Color and Scores based on the kid's field
+            if (currentlyDisplayedCandidate.field == StudentField.Science)
             {
-                kartArkaplan.color = new Color(0.2f, 0.4f, 0.8f); // Sayýsalcý Mavi
-                kartAlanText.text = "Alan: Sayýsal";
-                kartNetlerText.text = $"Mat: {suAnGosterilenAday.matNet}/20 (Max: {suAnGosterilenAday.potansiyelMat})\n" +
-                                      $"Fizik: {suAnGosterilenAday.fizikNet}/20 (Max: {suAnGosterilenAday.potansiyelFizik})\n" +
-                                      $"Kimya: {suAnGosterilenAday.kimyaNet}/20 (Max: {suAnGosterilenAday.potansiyelKimya})\n" +
-                                      $"Biyo: {suAnGosterilenAday.biyoNet}/20 (Max: {suAnGosterilenAday.potansiyelBiyo})";
+                cardBackground.color = new Color(0.2f, 0.4f, 0.8f); // Science Blue
+                cardFieldText.text = "Field: Science";
+                cardScoresText.text = $"Math: {currentlyDisplayedCandidate.mathScore}/20 (Max: {currentlyDisplayedCandidate.potentialMath})\n" +
+                                      $"Physics: {currentlyDisplayedCandidate.physicsScore}/20 (Max: {currentlyDisplayedCandidate.potentialPhysics})\n" +
+                                      $"Chem: {currentlyDisplayedCandidate.chemistryScore}/20 (Max: {currentlyDisplayedCandidate.potentialChemistry})\n" +
+                                      $"Bio: {currentlyDisplayedCandidate.bioScore}/20 (Max: {currentlyDisplayedCandidate.potentialBio})";
             }
-            else if (suAnGosterilenAday.alan == OgrenciAlani.EsitAgirlik)
+            else if (currentlyDisplayedCandidate.field == StudentField.EqualWeight)
             {
-                kartArkaplan.color = new Color(0.8f, 0.6f, 0.2f); // EA Sarý
-                kartAlanText.text = "Alan: Eþit Aðýrlýk";
-                kartNetlerText.text = $"Türkçe: {suAnGosterilenAday.turkceNet}/40 (Max: {suAnGosterilenAday.potansiyelTurkce})\n" +
-                                      $"Mat: {suAnGosterilenAday.matNet}/40 (Max: {suAnGosterilenAday.potansiyelMat})";
+                cardBackground.color = new Color(0.8f, 0.6f, 0.2f); // Equal Weight Yellow
+                cardFieldText.text = "Field: Equal Weight";
+                cardScoresText.text = $"Turkish: {currentlyDisplayedCandidate.turkishScore}/40 (Max: {currentlyDisplayedCandidate.potentialTurkish})\n" +
+                                      $"Math: {currentlyDisplayedCandidate.mathScore}/40 (Max: {currentlyDisplayedCandidate.potentialMath})";
             }
-            else if (suAnGosterilenAday.alan == OgrenciAlani.Sozel)
+            else if (currentlyDisplayedCandidate.field == StudentField.Humanities)
             {
-                kartArkaplan.color = new Color(0.8f, 0.3f, 0.3f); // Sözel Kýrmýzý
-                kartAlanText.text = "Alan: Sözel";
-                kartNetlerText.text = $"Türkçe: {suAnGosterilenAday.turkceNet}/20 (Max: {suAnGosterilenAday.potansiyelTurkce})\n" +
-                                      $"Tarih: {suAnGosterilenAday.tarihNet}/20 (Max: {suAnGosterilenAday.potansiyelTarih})\n" +
-                                      $"Coðrafya: {suAnGosterilenAday.cogNet}/20 (Max: {suAnGosterilenAday.potansiyelCog})\n" +
-                                      $"Felsefe: {suAnGosterilenAday.felsefeNet}/20 (Max: {suAnGosterilenAday.potansiyelFelsefe})";
+                cardBackground.color = new Color(0.8f, 0.3f, 0.3f); // Humanities Red
+                cardFieldText.text = "Field: Humanities";
+                cardScoresText.text = $"Turkish: {currentlyDisplayedCandidate.turkishScore}/20 (Max: {currentlyDisplayedCandidate.potentialTurkish})\n" +
+                                      $"History: {currentlyDisplayedCandidate.historyScore}/20 (Max: {currentlyDisplayedCandidate.potentialHistory})\n" +
+                                      $"Geo: {currentlyDisplayedCandidate.geoScore}/20 (Max: {currentlyDisplayedCandidate.potentialGeo})\n" +
+                                      $"Philosophy: {currentlyDisplayedCandidate.philosophyScore}/20 (Max: {currentlyDisplayedCandidate.potentialPhilosophy})";
             }
         }
         else
         {
-            // Kapýda aday kalmadýysa paneli kapat ve normal oyuna dön
-            adayPaneli.SetActive(false);
+            // If no candidates left at the door, close the panel and return to normal game
+            candidatePanel.SetActive(false);
         }
     }
 
-    public void AdayiKabulEt()
+    public void AcceptCandidate()
     {
-        dershanedekiOgrenciler.Add(suAnGosterilenAday); // Dershaneye kaydet
-        ogrenciSayisi++;
-        kapidakiAdaylar.RemoveAt(0); // Kapýdaki sýradan sil
-        SiradakiAdayiGoster();       // Varsa sýradaki öðrenciyi ekrana getir
-        ArayuzuGuncelle();
+        enrolledStudents.Add(currentlyDisplayedCandidate); // Register to academy
+        studentCount++;
+        waitingCandidates.RemoveAt(0); // Remove from the waiting line
+        ShowNextCandidate();           // Show the next student if available
+        UpdateUI();
     }
 
-    public void AdayiReddet()
+    public void RejectCandidate()
     {
-        kapidakiAdaylar.RemoveAt(0); // Çocuðu kov
-        SiradakiAdayiGoster();       // Varsa sýradaki öðrenciyi ekrana getir
+        waitingCandidates.RemoveAt(0); // Kick the kid out
+        ShowNextCandidate();           // Show the next student if available
     }
-    // --- YENÝ EKLENEN PANEL FONKSÝYONLARI BURADA BÝTÝYOR ---
+    // --- NEWLY ADDED PANEL FUNCTIONS END HERE ---
 
-    // SENÝN MEVCUT FONKSÝYONLARIN AYNLEN DURUYOR
-    public void OgrenciKaydet()
+    // YOUR EXISTING FUNCTIONS REMAIN EXACTLY THE SAME (Translated)
+    public void EnrollStudent()
     {
-        if (oyunBittiMi) return;
+        if (isGameOver) return;
 
-        kasa += 1000;
-        ogrenciSayisi++;
-        ArayuzuGuncelle();
+        money += 1000;
+        studentCount++;
+        UpdateUI();
     }
 
-    public void LaboratuvardaUret()
+    public void ProduceInLaboratory()
     {
-        if (oyunBittiMi) return;
+        if (isGameOver) return;
 
-        if (kasa >= uretimMaliyeti)
+        if (money >= productionCost)
         {
-            kasa -= uretimMaliyeti;
-            iksirStogu++;
-            supheSeviyesi += uretimRiski;
+            money -= productionCost;
+            potionStock++;
+            suspicionLevel += productionRisk;
 
-            if (supheSeviyesi >= 100)
+            if (suspicionLevel >= 100)
             {
-                supheText.text = "ÞÜPHE: %100";
-                kasaText.text = "POLÝS BASKINI!";
-                gunText.text = "TUTUKLANDIN!";
-                oyunBittiMi = true;
+                suspicionText.text = "SUSPICION: 100%";
+                moneyText.text = "POLICE RAID!";
+                dayText.text = "BUSTED!";
+                isGameOver = true;
                 return;
             }
 
-            ArayuzuGuncelle();
+            UpdateUI();
         }
     }
 
-    public void IksirIciri()
+    public void GivePotion()
     {
-        if (oyunBittiMi || iksirStogu <= 0 || ogrenciSayisi <= 0) return;
+        if (isGameOver || potionStock <= 0 || studentCount <= 0) return;
 
-        iksirStogu--;
-        basariOrani += 5;
-        supheSeviyesi += 2;
+        potionStock--;
+        successRate += 5;
+        suspicionLevel += 2;
 
-        ArayuzuGuncelle();
+        UpdateUI();
     }
 
-    public void OgrenciListesiniGuncelle()
+    public void UpdateStudentList()
     {
-        // Önce listedeki eski satýrlarý temizleyelim
-        foreach (Transform child in ogrenciListesiContent)
+        // First, let's clear the old rows in the list
+        foreach (Transform child in studentListContent)
         {
             Destroy(child.gameObject);
         }
 
-        // Dershanedeki her bir öðrenci için yeni bir satýr üret
-        foreach (Student ogr in dershanedekiOgrenciler)
+        // Generate a new row for each student in the academy
+        foreach (Student student in enrolledStudents)
         {
-            // Kalýptan yeni bir satýr oluþtur ve Content'in içine koy
-            GameObject yeniSatir = Instantiate(ogrenciSatiriPrefab, ogrenciListesiContent);
+            // Create a new row from the prefab and put it inside the Content
+            GameObject newRow = Instantiate(studentRowPrefab, studentListContent);
 
-            // Ýçindeki Text'leri sýrasýyla bul
-            TextMeshProUGUI[] yazilar = yeniSatir.GetComponentsInChildren<TextMeshProUGUI>();
+            // Find the Texts inside it sequentially
+            TextMeshProUGUI[] texts = newRow.GetComponentsInChildren<TextMeshProUGUI>();
 
-            yazilar[0].text = ogr.isim;
-            yazilar[1].text = "Alan: " + ogr.alan.ToString();
-            yazilar[2].text = "Gelir: " + ogr.gelirKatkisi + " TL/Gün";
+            texts[0].text = student.studentName;
+            texts[1].text = "Field: " + student.field.ToString();
+            texts[2].text = "Income: " + student.incomeContribution + " TL/Day";
 
-            // Çocuðun alanýna göre 4. Text'e (Netler) yazýlacak metni belirle
-            string netYazisi = "";
-            if (ogr.alan == OgrenciAlani.Sayisal)
+            // Determine the text to be written in the 4th Text (Scores) based on the kid's field
+            string scoreText = "";
+            if (student.field == StudentField.Science)
             {
-                netYazisi = $"Mat: {ogr.matNet} | Fiz: {ogr.fizikNet} | Kim: {ogr.kimyaNet} | Biyo: {ogr.biyoNet}";
+                scoreText = $"Math: {student.mathScore} | Phys: {student.physicsScore} | Chem: {student.chemistryScore} | Bio: {student.bioScore}";
             }
-            else if (ogr.alan == OgrenciAlani.EsitAgirlik)
+            else if (student.field == StudentField.EqualWeight)
             {
-                netYazisi = $"Tür: {ogr.turkceNet} | Mat: {ogr.matNet}";
+                scoreText = $"Turk: {student.turkishScore} | Math: {student.mathScore}";
             }
-            else if (ogr.alan == OgrenciAlani.Sozel)
+            else if (student.field == StudentField.Humanities)
             {
-                netYazisi = $"Tür: {ogr.turkceNet} | Tar: {ogr.tarihNet} | Coð: {ogr.cogNet} | Fel: {ogr.felsefeNet}";
+                scoreText = $"Turk: {student.turkishScore} | Hist: {student.historyScore} | Geo: {student.geoScore} | Phil: {student.philosophyScore}";
             }
 
-            yazilar[3].text = netYazisi; // 4. Text'e netleri basýyoruz
+            texts[3].text = scoreText; // Print the scores to the 4th Text
         }
     }
 
-    public void OgrenciListesiniAcKapat()
+    public void ToggleStudentListPanel()
     {
-        // Eðer mülakat paneli açýksa, öðrenci listesini açmaya izin verme (karýþmasýnlar)
-        if (adayPaneli.activeSelf) return;
+        // If the interview panel is open, don't allow opening the student list (so they don't overlap)
+        if (candidatePanel.activeSelf) return;
 
-        // Panelin durumunu tersine çevir (Açýksa kapat, kapalýysa aç)
-        bool suAnkiDurum = ogrenciListesiPaneli.activeSelf;
-        ogrenciListesiPaneli.SetActive(!suAnkiDurum);
+        // Invert the panel's state (Close if open, open if closed)
+        bool currentState = studentListPanel.activeSelf;
+        studentListPanel.SetActive(!currentState);
 
-        // Eðer paneli þu an açýyorsak, listeyi de baþtan çizelim ki yeni çocuklar eklensin
-        if (!suAnkiDurum)
+        // If we are opening the panel right now, let's redraw the list from scratch so new kids are added
+        if (!currentState)
         {
-            OgrenciListesiniGuncelle();
+            UpdateStudentList();
         }
     }
 
-    public void OdakSurubuUret()
+    public void ProduceFocusSyrup()
     {
-        // Kasada yeterli para var mý kontrol et
-        if (kasa >= iksirMaliyeti)
+        // Check if there is enough money in the safe
+        if (money >= potionCost)
         {
-            kasa -= iksirMaliyeti; // Parayý düþ
-            odakSurubuSayisi++;         // Ýksiri ekle
+            money -= potionCost;         // Deduct money
+            focusSyrupCount++;           // Add potion
 
-            // Ekrandaki yazýlarý anlýk güncelle
-            ArayuzuGuncelle(); // Zaten yazdýðýn para güncelleme fonksiyonu (adý farklýysa ona göre deðiþtir)
-            LaboratuvarUITemizle();
+            // Update on-screen texts instantly
+            UpdateUI(); 
+            UpdateLaboratoryUI();
 
-            Debug.Log("Kimyasal baþarýyla kaynatýldý! Yeni Ýksir Üretildi.");
+            Debug.Log("[LAB] Chemical successfully boiled! New Potion produced.");
         }
         else
         {
-            Debug.Log("Kasa tam takýr! Ýksir üretecek para yok.");
-            // Ýleride buraya "Paran Yok!" uyarý penceresi çakarýz
+            Debug.Log("[LAB] Safe is empty! Not enough money to produce potion.");
+            // We can pop up an "Out of Money!" warning window here later
         }
     }
 
-    public void LaboratuvarUITemizle()
+    public void UpdateLaboratoryUI()
     {
-        odakSurubuText.text = "Sahip Olunan Odak\nÞurubu: " + odakSurubuSayisi;
+        focusSyrupText.text = "Owned Focus\nSyrup: " + focusSyrupCount;
     }
 
-    public void LaboratuvarPaneliAcKapat()
+    public void ToggleLaboratoryPanel()
     {
-        if (adayPaneli.activeSelf) return; // Mülakat varken açýlmasýn
+        if (candidatePanel.activeSelf) return; // Don't open while interviewing
 
-        bool suAnkiDurum = laboratuvarPaneli.activeSelf;
-        laboratuvarPaneli.SetActive(!suAnkiDurum);
+        bool currentState = laboratoryPanel.activeSelf;
+        laboratoryPanel.SetActive(!currentState);
 
-        if (!suAnkiDurum)
+        if (!currentState)
         {
-            LaboratuvarUITemizle(); // Panel açýlýrken güncel miktarý yazsýn
+            UpdateLaboratoryUI(); // Write the current amount when the panel opens
         }
     }
 
-    void ArayuzuGuncelle()
+    void UpdateUI()
     {
-        kasaText.text = kasa + " TL";
-        gunText.text = "Gün: " + kacinciGun;
-        supheText.text = "Þüphe: %" + supheSeviyesi;
+        moneyText.text = money + " TL";
+        dayText.text = "Day: " + currentDay;
+        suspicionText.text = "Suspicion: %" + suspicionLevel;
 
-        if (iksirText != null) iksirText.text = "Ýksir: " + iksirStogu;
-        if (ogrenciText != null) ogrenciText.text = "Öðrenci: " + ogrenciSayisi;
-        if (basariText != null) basariText.text = "Baþarý: %" + basariOrani;
+        if (potionText != null) potionText.text = "Potion: " + potionStock;
+        if (studentText != null) studentText.text = "Student: " + studentCount;
+        if (successText != null) successText.text = "Success: %" + successRate;
     }
 }

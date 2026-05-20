@@ -1,119 +1,143 @@
 using UnityEngine;
 
-// Çocuðun hangi alandan sýnava gireceðini belirleyen kategori
-public enum OgrenciAlani { Sayisal, EsitAgirlik, Sozel }
+// Category determining which field the kid will take the exam in
+public enum StudentField { Science, EqualWeight, Humanities }
 
 [System.Serializable]
 public class Student
 {
-    public string isim;
-    public OgrenciAlani alan; // Sayýsal mý, EA mý, Sözel mi?
-    public int gelirKatkisi;
+    public string studentName;
+    public StudentField field; // Science, Equal Weight, or Humanities?
+    public int incomeContribution;
 
-    // --- DERS NETLERÝ (Mevcut / Potansiyel) ---
-    public int matNet, potansiyelMat;
-    public int fizikNet, potansiyelFizik;
-    public int kimyaNet, potansiyelKimya;
-    public int biyoNet, potansiyelBiyo;
+    // --- DYNAMIC SURVIVAL BARS (0 - 100) ---
+    public int sanity;
+    public int energy;
+    public int loyalty;
+    public int toxicity;
 
-    public int turkceNet, potansiyelTurkce;
-    public int tarihNet, potansiyelTarih;
-    public int cogNet, potansiyelCog;
-    public int felsefeNet, potansiyelFelsefe;
+    // --- CORE RPG STATS (1 - 10) ---
+    public int intelligence;
+    public int physique;
+    public int willpower;
+    public int wealth;
 
-    public Student(int dershaneBasarisi)
+    // --- COURSE SCORES (Current / Potential) ---
+    public int mathScore, potentialMath;
+    public int physicsScore, potentialPhysics;
+    public int chemistryScore, potentialChemistry;
+    public int bioScore, potentialBio;
+
+    public int turkishScore, potentialTurkish;
+    public int historyScore, potentialHistory;
+    public int geoScore, potentialGeo;
+    public int philosophyScore, potentialPhilosophy;
+
+    public Student(int academySuccess)
     {
-        // DEV ERKEK & KADIN ÝSÝM HAVUZU
-        string[] isimler = {
-            "Yiðit", "Ahmet", "Mehmet", "Can", "Murat", "Selin", "Zeynep", "Buse", "Elif", "Arda",
-            "Burak", "Emre", "Furkan", "Oðuzhan", "Mert", "Volkan", "Gökhan", "Hakan", "Serkan", "Kaan",
-            "Deniz", "Ege", "Barýþ", "Umut", "Güneþ", "Doruk", "Görkem", "Batuhan", "Mete", "Alper",
-            "Yaðýz", "Emir", "Kerem", "Tarýk", "Utku", "Anýl", "Tuna", "Onur", "Cem", "Alp",
-            "Tolga", "Ozan", "Berk", "Eren", "Uður", "Okan", "Cihan", "Ýlker", "Soner", "Özgür",
-            "Ayþe", "Fatma", "Hayriye", "Emine", "Hatice", "Merve", "Gamze", "Gizem", "Seda", "Ebru",
-            "Tuðba", "Kübra", "Büþra", "Rabia", "Beyza", "Hilal", "Sena", "Aslý", "Ezgi", "Özge",
-            "Ceren", "Dilek", "Pýnar", "Irmak", "Damla", "Yaðmur", "Belen", "Nisa", "Melisa", "Aleyna",
-            "Didem", "Sinem", "Bahar", "Hazal", "Dilan", "Rojda", "Ece", "Melis", "Ýrem", "Berfin",
-            "Gözde", "Derya", "Asya", "Defne", "Derin", "Doða", "Bade", "Simge", "Hande", "Bengü",
-            "Gül", "Lale", "Karanfil", "Menekþe", "Narin", "Naz", "Eda", "Sude", "Eylül", "Öykü",
-            "Ali", "Veli", "Hasan", "Hüseyin", "Osman", "Mustafa", "Kemal", "Yusuf", "Ömer", "Hamza",
-            "Berat", "Efe", "Metehan", "Alparslan", "Oðuz", "Bugra", "Taha", "Yasin", "Bilal", "Fatih",
-            "Süleyman", "Ibrahim", "Halil", "Sadýk", "Salih", "Asým", "Metin", "Tekin", "Cetin", "Semih",
-            "Melisa", "Esen", "Duygu", "Sibel", "Yeþim", "Nihal", "Handan", "Jale", "Hale", "Leman",
-            "Berna", "Asena", "Banu", "Cansel", "Cansu", "Elmas", "Filiz", "Funda"
+        // GIANT MALE & FEMALE FIRST NAME POOL
+        string[] firstNames = {
+            "James", "John", "Robert", "Michael", "William", "David", "Richard", "Charles", "Joseph", "Thomas",
+            "Christopher", "Daniel", "Paul", "Mark", "Donald", "George", "Kenneth", "Steven", "Edward", "Brian",
+            "Ronald", "Anthony", "Kevin", "Jason", "Matthew", "Gary", "Timothy", "Jose", "Larry", "Jeffrey",
+            "Frank", "Scott", "Eric", "Stephen", "Andrew", "Raymond", "Gregory", "Joshua", "Jerry", "Dennis",
+            "Walter", "Patrick", "Peter", "Harold", "Douglas", "Henry", "Carl", "Arthur", "Ryan", "Roger",
+            "Mary", "Patricia", "Jennifer", "Linda", "Elizabeth", "Barbara", "Susan", "Jessica", "Sarah", "Karen",
+            "Nancy", "Lisa", "Betty", "Margaret", "Sandra", "Ashley", "Kimberly", "Emily", "Donna", "Michelle",
+            "Dorothy", "Carol", "Amanda", "Melissa", "Deborah", "Stephanie", "Rebecca", "Sharon", "Laura", "Cynthia",
+            "Kathleen", "Amy", "Shirley", "Angela", "Helen", "Anna", "Brenda", "Pamela", "Nicole", "Emma",
+            "Samantha", "Katherine", "Christine", "Debra", "Rachel", "Catherine", "Carolyn", "Janet", "Ruth", "Maria",
+            "Heather", "Diane", "Virginia", "Julie", "Joyce", "Victoria", "Olivia", "Kelly", "Christina", "Lauren",
+            "Joan", "Evelyn", "Judith", "Megan", "Cheryl", "Andrea", "Hannah", "Martha", "Jacqueline", "Frances",
+            "Gloria", "Ann", "Teresa", "Kathryn", "Sara", "Janice", "Jean", "Alice", "Madison", "Doris",
+            "Abigail", "Julia", "Judy", "Grace", "Denise", "Amber", "Marilyn", "Beverly", "Danielle", "Theresa",
+            "Sophia", "Marie", "Diana", "Brittany", "Natalie", "Isabella", "Charlotte", "Rose", "Alexis", "Kayla",
+            "Liam", "Noah", "Oliver", "Elijah", "Lucas", "Mason", "Logan", "Ethan"
         };
 
-        // DEV SOYADI HAVUZU
-        string[] soyadlar = {
-            "Yýlmaz", "Kaya", "Demir", "Çelik", "Þahin", "Yýldýz", "Yýldýrým", "Öztürk", "Aydýn", "Özdemir",
-            "Arslan", "Doðan", "Kýlýç", "Aslan", "Çetin", "Kara", "Koç", "Kurt", "Özkan", "Þimþek",
-            "Acar", "Avcý", "Yaman", "Bulut", "Köse", "Aksoy", "Yalçýn", "Turan", "Güler", "Yaser",
-            "Korkmaz", "Erdoðan", "Polat", "Güneþ", "Eser", "Candan", "Tekin", "Uysal", "Gök",
-            "Okan", "Budak", "Sarý", "Aktaþ", "Uzun", "Kýsa", "Yüksek", "Alkan", "Þen", "Gül",
-            "Akýn", "Bozkurt", "Özcan", "Gündüz", "Ünal", "Yiðit", "Güngör", "Çakýr", "Koçak", "Özer",
-            "Duran", "Akkuþ", "Sarýkaya", "Yavuz", "Karaca", "Güven", "Coþkun", "Deniz", "Solmaz", "Ay",
-            "Karakaya", "Erten", "Tüfekçi", "Sönmez", "Öz", "Gencer", "Baþtürk", "Yurt", "Savaþ", "Barýþ",
-            "Umut", "Duman", "Köksal", "Tuncer", "Büyük", "Küçük", "Akyol", "Iþýk", "Sarýoðlu", "Avseren",
-            "Dað", "Taþ", "Kütük", "Kalýp", "Dengiz", "Pekcan", "Uçar", "Kaçan", "Yazar", "Çizer"
+        // GIANT LAST NAME POOL
+        string[] lastNames = {
+            "Smith", "Johnson", "Williams", "Brown", "Jones", "Garcia", "Miller", "Davis", "Rodriguez", "Martinez",
+            "Hernandez", "Lopez", "Gonzalez", "Wilson", "Anderson", "Thomas", "Taylor", "Moore", "Jackson", "Martin",
+            "Lee", "Perez", "Thompson", "White", "Harris", "Sanchez", "Clark", "Ramirez", "Lewis", "Robinson",
+            "Walker", "Young", "Allen", "King", "Wright", "Scott", "Torres", "Nguyen", "Hill",
+            "Flores", "Green", "Adams", "Nelson", "Baker", "Hall", "Rivera", "Campbell", "Mitchell", "Carter",
+            "Roberts", "Gomez", "Phillips", "Evans", "Turner", "Diaz", "Parker", "Cruz", "Edwards", "Collins",
+            "Reyes", "Stewart", "Morris", "Morales", "Murphy", "Cook", "Rogers", "Gutierrez", "Ortiz", "Morgan",
+            "Cooper", "Peterson", "Bailey", "Reed", "Kelly", "Howard", "Ramos", "Kim", "Cox", "Ward",
+            "Richardson", "Watson", "Brooks", "Chavez", "Wood", "James", "Bennett", "Gray", "Mendoza", "Ruiz",
+            "Hughes", "Price", "Alvarez", "Castillo", "Sanders", "Patel", "Myers", "Long", "Ross", "Foster"
         };
 
-        // Ýsmi ve Soyadý Kombinle
-        this.isim = isimler[Random.Range(0, isimler.Length)] + " " + soyadlar[Random.Range(0, soyadlar.Length)];
+        // Combine First and Last Name
+        this.studentName = firstNames[Random.Range(0, firstNames.Length)] + " " + lastNames[Random.Range(0, lastNames.Length)];
 
-        // 2. RASTGELE ALAN SEÇÝMÝ
-        this.alan = (OgrenciAlani)Random.Range(0, 3); // 0, 1 veya 2 döner
+        // 2. RANDOM FIELD SELECTION
+        this.field = (StudentField)Random.Range(0, 3); // Returns 0, 1, or 2
 
-        // 3. STAT DAÐITIMI VE EKONOMÝ
-        if (dershaneBasarisi < 30) this.gelirKatkisi = Random.Range(50, 100);
-        else if (dershaneBasarisi < 70) this.gelirKatkisi = Random.Range(150, 250);
-        else this.gelirKatkisi = Random.Range(400, 600);
+        // 3. STAT DISTRIBUTION AND ECONOMY
+        // Initialize Core RPG Stats (1 - 10)
+        this.intelligence = Random.Range(1, 11);
+        this.physique = Random.Range(1, 11);
+        this.willpower = Random.Range(1, 11);
+        this.wealth = Random.Range(1, 11);
 
-        // 4. ALANINA GÖRE NETLERÝ BELÝRLE
-        switch (this.alan)
+        // Initialize Dynamic Survival Bars (0 - 100)
+        this.sanity = 100;
+        this.energy = 100;
+        this.loyalty = 50;
+        this.toxicity = 0;
+
+        // Wealth replaces the strict manual income setting
+        this.incomeContribution = this.wealth * Random.Range(40, 65);
+
+        // 4. DETERMINE SCORES BASED ON FIELD
+        switch (this.field)
         {
-            case OgrenciAlani.Sayisal:
-                matNet = NetUret(20, dershaneBasarisi, out potansiyelMat);
-                fizikNet = NetUret(20, dershaneBasarisi, out potansiyelFizik);
-                kimyaNet = NetUret(20, dershaneBasarisi, out potansiyelKimya);
-                biyoNet = NetUret(20, dershaneBasarisi, out potansiyelBiyo);
+            case StudentField.Science:
+                mathScore = GenerateScore(20, academySuccess, out potentialMath);
+                physicsScore = GenerateScore(20, academySuccess, out potentialPhysics);
+                chemistryScore = GenerateScore(20, academySuccess, out potentialChemistry);
+                bioScore = GenerateScore(20, academySuccess, out potentialBio);
                 break;
 
-            case OgrenciAlani.EsitAgirlik:
-                turkceNet = NetUret(40, dershaneBasarisi, out potansiyelTurkce);
-                matNet = NetUret(40, dershaneBasarisi, out potansiyelMat);
+            case StudentField.EqualWeight:
+                turkishScore = GenerateScore(40, academySuccess, out potentialTurkish);
+                mathScore = GenerateScore(40, academySuccess, out potentialMath);
                 break;
 
-            case OgrenciAlani.Sozel:
-                turkceNet = NetUret(20, dershaneBasarisi, out potansiyelTurkce);
-                tarihNet = NetUret(20, dershaneBasarisi, out potansiyelTarih);
-                cogNet = NetUret(20, dershaneBasarisi, out potansiyelCog);
-                felsefeNet = NetUret(20, dershaneBasarisi, out potansiyelFelsefe);
+            case StudentField.Humanities:
+                turkishScore = GenerateScore(20, academySuccess, out potentialTurkish);
+                historyScore = GenerateScore(20, academySuccess, out potentialHistory);
+                geoScore = GenerateScore(20, academySuccess, out potentialGeo);
+                philosophyScore = GenerateScore(20, academySuccess, out potentialPhilosophy);
                 break;
         }
     }
 
-    // Maksimum soru sayýsýna ve dershane baþarýsýna göre mantýklý net üreten motor
-    private int NetUret(int maxSoru, int dershaneBasarisi, out int potansiyel)
+    // Engine that generates logical scores based on max questions and academy success
+    private int GenerateScore(int maxQuestions, int academySuccess, out int potential)
     {
-        // ARTIK maxSoru DEÐERÝ DIÞARIDAN GELEN (20 veya 40) DEÐER OLACAK
-        int mevcutNet;
+        // maxQuestions VALUE WILL NOW BE THE INCOMING VALUE (20 or 40)
+        int currentScore;
 
-        if (dershaneBasarisi < 30) // Tembel tayfa (0 - %40 net arasý)
+        if (academySuccess < 30) // Lazy squad (0 - 40% score range)
         {
-            mevcutNet = Random.Range(0, (int)(maxSoru * 0.41f));
-            potansiyel = Random.Range(mevcutNet, (int)(maxSoru * 0.71f));
+            currentScore = Random.Range(0, (int)(maxQuestions * 0.41f));
+            potential = Random.Range(currentScore, (int)(maxQuestions * 0.71f));
         }
-        else if (dershaneBasarisi < 70) // Orta seviye (%30 - %70 net arasý)
+        else if (academySuccess < 70) // Mid-level (30% - 70% score range)
         {
-            mevcutNet = Random.Range((int)(maxSoru * 0.3f), (int)(maxSoru * 0.71f));
-            potansiyel = Random.Range(mevcutNet, (int)(maxSoru * 0.91f));
+            currentScore = Random.Range((int)(maxQuestions * 0.3f), (int)(maxQuestions * 0.71f));
+            potential = Random.Range(currentScore, (int)(maxQuestions * 0.91f));
         }
-        else // Derece öðrencisi (%60 - Full net arasý)
+        else // Top tier student (60% - Full score range)
         {
-            mevcutNet = Random.Range((int)(maxSoru * 0.6f), maxSoru + 1);
-            potansiyel = maxSoru;
+            currentScore = Random.Range((int)(maxQuestions * 0.6f), maxQuestions + 1);
+            potential = maxQuestions;
         }
 
-        return mevcutNet;
+        return currentScore;
     }
 }
+
