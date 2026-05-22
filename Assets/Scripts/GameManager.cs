@@ -112,34 +112,37 @@ public class GameManager : MonoBehaviour
         {
             currentlyDisplayedCandidate = waitingCandidates[0]; // Get the first kid from the list
 
-            cardNameText.text = currentlyDisplayedCandidate.studentName;
-            cardIncomeText.text = "Expected Income: " + currentlyDisplayedCandidate.incomeContribution + " TL/Day";
+            if (cardNameText != null) cardNameText.text = currentlyDisplayedCandidate.studentName;
+            if (cardIncomeText != null) cardIncomeText.text = "Expected Income: " + currentlyDisplayedCandidate.incomeContribution + " TL/Day";
 
-            // Set Color and Scores based on the kid's field
-            if (currentlyDisplayedCandidate.field == StudentField.Science)
+            if (cardBackground != null && cardFieldText != null && cardScoresText != null)
             {
-                cardBackground.color = new Color(0.2f, 0.4f, 0.8f); // Science Blue
-                cardFieldText.text = "Field: Science";
-                cardScoresText.text = $"Math: {currentlyDisplayedCandidate.mathScore}/20 (Max: {currentlyDisplayedCandidate.potentialMath})\n" +
-                                      $"Physics: {currentlyDisplayedCandidate.physicsScore}/20 (Max: {currentlyDisplayedCandidate.potentialPhysics})\n" +
-                                      $"Chem: {currentlyDisplayedCandidate.chemistryScore}/20 (Max: {currentlyDisplayedCandidate.potentialChemistry})\n" +
-                                      $"Bio: {currentlyDisplayedCandidate.bioScore}/20 (Max: {currentlyDisplayedCandidate.potentialBio})";
-            }
-            else if (currentlyDisplayedCandidate.field == StudentField.EqualWeight)
-            {
-                cardBackground.color = new Color(0.8f, 0.6f, 0.2f); // Equal Weight Yellow
-                cardFieldText.text = "Field: Equal Weight";
-                cardScoresText.text = $"Turkish: {currentlyDisplayedCandidate.turkishScore}/40 (Max: {currentlyDisplayedCandidate.potentialTurkish})\n" +
-                                      $"Math: {currentlyDisplayedCandidate.mathScore}/40 (Max: {currentlyDisplayedCandidate.potentialMath})";
-            }
-            else if (currentlyDisplayedCandidate.field == StudentField.Humanities)
-            {
-                cardBackground.color = new Color(0.8f, 0.3f, 0.3f); // Humanities Red
-                cardFieldText.text = "Field: Humanities";
-                cardScoresText.text = $"Turkish: {currentlyDisplayedCandidate.turkishScore}/20 (Max: {currentlyDisplayedCandidate.potentialTurkish})\n" +
-                                      $"History: {currentlyDisplayedCandidate.historyScore}/20 (Max: {currentlyDisplayedCandidate.potentialHistory})\n" +
-                                      $"Geo: {currentlyDisplayedCandidate.geoScore}/20 (Max: {currentlyDisplayedCandidate.potentialGeo})\n" +
-                                      $"Philosophy: {currentlyDisplayedCandidate.philosophyScore}/20 (Max: {currentlyDisplayedCandidate.potentialPhilosophy})";
+                // Set Color and Scores based on the kid's field
+                if (currentlyDisplayedCandidate.field == StudentField.Science)
+                {
+                    cardBackground.color = new Color(0.2f, 0.4f, 0.8f); // Science Blue
+                    cardFieldText.text = "Field: Science";
+                    cardScoresText.text = $"Math: {currentlyDisplayedCandidate.mathScore}/20 (Max: {currentlyDisplayedCandidate.potentialMath})\n" +
+                                          $"Physics: {currentlyDisplayedCandidate.physicsScore}/20 (Max: {currentlyDisplayedCandidate.potentialPhysics})\n" +
+                                          $"Chem: {currentlyDisplayedCandidate.chemistryScore}/20 (Max: {currentlyDisplayedCandidate.potentialChemistry})\n" +
+                                          $"Bio: {currentlyDisplayedCandidate.bioScore}/20 (Max: {currentlyDisplayedCandidate.potentialBio})";
+                }
+                else if (currentlyDisplayedCandidate.field == StudentField.EqualWeight)
+                {
+                    cardBackground.color = new Color(0.8f, 0.6f, 0.2f); // Equal Weight Yellow
+                    cardFieldText.text = "Field: Equal Weight";
+                    cardScoresText.text = $"Turkish: {currentlyDisplayedCandidate.turkishScore}/40 (Max: {currentlyDisplayedCandidate.potentialTurkish})\n" +
+                                          $"Math: {currentlyDisplayedCandidate.mathScore}/40 (Max: {currentlyDisplayedCandidate.potentialMath})";
+                }
+                else if (currentlyDisplayedCandidate.field == StudentField.Humanities)
+                {
+                    cardBackground.color = new Color(0.8f, 0.3f, 0.3f); // Humanities Red
+                    cardFieldText.text = "Field: Humanities";
+                    cardScoresText.text = $"Turkish: {currentlyDisplayedCandidate.turkishScore}/20 (Max: {currentlyDisplayedCandidate.potentialTurkish})\n" +
+                                          $"History: {currentlyDisplayedCandidate.historyScore}/20 (Max: {currentlyDisplayedCandidate.potentialHistory})\n" +
+                                          $"Geo: {currentlyDisplayedCandidate.geoScore}/20 (Max: {currentlyDisplayedCandidate.potentialGeo})\n" +
+                                          $"Philosophy: {currentlyDisplayedCandidate.philosophyScore}/20 (Max: {currentlyDisplayedCandidate.potentialPhilosophy})";
+                }
             }
         }
         else
@@ -211,41 +214,16 @@ public class GameManager : MonoBehaviour
 
     public void UpdateStudentList()
     {
-        // First, let's clear the old rows in the list
-        foreach (Transform child in studentListContent)
+        // Eski manuel TextMeshPro arama sistemi İPTAL. 
+        // Artık otonom StudentsListManager bu işi devraldı.
+        StudentsListManager listManager = FindObjectOfType<StudentsListManager>();
+        if (listManager != null)
         {
-            Destroy(child.gameObject);
+            listManager.RefreshList();
         }
-
-        // Generate a new row for each student in the academy
-        foreach (Student student in enrolledStudents)
+        else
         {
-            // Create a new row from the prefab and put it inside the Content
-            GameObject newRow = Instantiate(studentRowPrefab, studentListContent);
-
-            // Find the Texts inside it sequentially
-            TextMeshProUGUI[] texts = newRow.GetComponentsInChildren<TextMeshProUGUI>();
-
-            texts[0].text = student.studentName;
-            texts[1].text = "Field: " + student.field.ToString();
-            texts[2].text = "Income: " + student.incomeContribution + " TL/Day";
-
-            // Determine the text to be written in the 4th Text (Scores) based on the kid's field
-            string scoreText = "";
-            if (student.field == StudentField.Science)
-            {
-                scoreText = $"Math: {student.mathScore} | Phys: {student.physicsScore} | Chem: {student.chemistryScore} | Bio: {student.bioScore}";
-            }
-            else if (student.field == StudentField.EqualWeight)
-            {
-                scoreText = $"Turk: {student.turkishScore} | Math: {student.mathScore}";
-            }
-            else if (student.field == StudentField.Humanities)
-            {
-                scoreText = $"Turk: {student.turkishScore} | Hist: {student.historyScore} | Geo: {student.geoScore} | Phil: {student.philosophyScore}";
-            }
-
-            texts[3].text = scoreText; // Print the scores to the 4th Text
+            Debug.LogWarning("[GameManager] StudentsListManager bulunamadı! Lütfen listeyi yönetecek objeye scripti ekleyin.");
         }
     }
 
