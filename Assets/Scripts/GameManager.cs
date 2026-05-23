@@ -3,6 +3,19 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine.UI; // NEW: Added to change the card's background color (Science/Humanities)
 
+public class StudentDailyModifiers
+{
+    public float IncomeMultiplier = 1f;
+    public int ExtraEnergyDecay = 0;
+    public int ExtraSanityDecay = 0;
+    public float ToxicityIncreaseMultiplier = 1f;
+    public int EnergyDecayReduction = 0;
+    public int LoyaltyBonus = 0;
+    public int SanityBonus = 0;
+    public bool PreventStatDecay = false;
+    public bool IsIncomeZero = false;
+}
+
 public class GameManager : MonoBehaviour
 {
     [Header("UI Elements")]
@@ -74,29 +87,55 @@ public class GameManager : MonoBehaviour
         }
 
         // --- YENİ SİSTEM: HASAT VAKTİ VE EZİYET ---
+        // Öğretmen branşlarına göre günlük modifiyeleri hesapla
+        StudentDailyModifiers mods = CalculateBranchEffects();
+        
         int totalIncomeForToday = 0;
 
         foreach (Student kid in enrolledStudents)
         {
             // 1. Kasa Kazancı: (Cüzdan + Zeka). Oyun ekonomisi anlamlı olsun diye 50 ile çarpılıyor.
-            int dailyIncome = (kid.intelligence + kid.wealth) * 50;
+            float dailyIncomeFloat = (kid.intelligence + kid.wealth) * 50f;
+            
+            // Branş etkisini uygula (Çarpanlar ve Felsefe sıfırlaması)
+            dailyIncomeFloat *= mods.IncomeMultiplier;
+            if (mods.IsIncomeZero) dailyIncomeFloat = 0;
+            
+            int dailyIncome = Mathf.RoundToInt(dailyIncomeFloat);
             totalIncomeForToday += dailyIncome;
             kid.incomeContribution = dailyIncome;
 
             // 2. Eziyet (Mentalite ve Enerji Düşüşü)
-            // Sabit 20 puan düşüş istedin. İrade (1-10) statı bu düşüşü engeller. 
-            // İrade 10 ise 10 düşer, 1 ise 19 düşer.
-            int decay = 20 - kid.willpower;
-            if (decay < 0) decay = 0;
+            int baseDecay = 20 - kid.willpower;
+            if (baseDecay < 0) baseDecay = 0;
 
-            kid.energy -= decay;
-            kid.sanity -= decay;
+            // Branşlardan gelen ekstra yorgunluk ve hafifletmeleri hesapla
+            int finalEnergyDecay = baseDecay + mods.ExtraEnergyDecay - mods.EnergyDecayReduction;
+            if (finalEnergyDecay < 0) finalEnergyDecay = 0;
+            
+            int finalSanityDecay = baseDecay + mods.ExtraSanityDecay;
+            if (finalSanityDecay < 0) finalSanityDecay = 0;
+
+            // Cografya hocası varsa (PreventStatDecay) yorgunluk sıfırlanır
+            if (mods.PreventStatDecay)
+            {
+                finalEnergyDecay = 0;
+                finalSanityDecay = 0;
+            }
+
+            kid.energy -= finalEnergyDecay;
+            kid.sanity -= finalSanityDecay;
+
+            // Branşların pozitif bonusları (Felsefe ve Tarih vb.)
+            kid.sanity += mods.SanityBonus;
+            kid.loyalty += mods.LoyaltyBonus;
 
             // 3. Detoks (Toksisite Temizliği)
             if (kid.toxicity > 0)
             {
                 kid.toxicity -= 10;
             }
+            // (mods.ToxicityIncreaseMultiplier ileride laboratuvar toksisite artışı eklendiğinde kullanılacak)
 
             // 4. Matematiksel Sınırlar (Mathf.Clamp)
             kid.energy = Mathf.Clamp(kid.energy, 0, 100);
@@ -114,22 +153,78 @@ public class GameManager : MonoBehaviour
             return;
         }
 
+        // --- YENİ EKLENEN: ÖĞRETMENLERİN GÜN SONU İŞLEMLERİ ---
+        TeacherManager teacherManager = FindObjectOfType<TeacherManager>(true);
+        if (teacherManager != null)
+        {
+            teacherManager.ProcessTeachersEndDay();
+        }
+
         UpdateUI();
 
         // 5. Öğrenci Listesi UI'ını tetikle
         UpdateStudentList();
         
-        // Ertesi gün için mülakat panelinin aday limitini sıfırla
-        CandidateManager candidateManager = FindObjectOfType<CandidateManager>();
-        if(candidateManager != null)
+        // Ertesi gün için kapıya yeni adaylar geldiğinde paneli otomatik aç!
+        if (candidatePanel != null)
         {
-            candidateManager.candidatesLeftToday = 3;
-            // Eğer o an panel açıksa ve ekranda eski aday varsa yenilesin
-            if (candidateManager.gameObject.activeInHierarchy)
+            candidatePanel.SetActive(true);
+        }
+    }
+
+    // --- BRANŞ ETKİLERİNİ HESAPLAYAN YARDIMCI FONKSİYON ---
+    private StudentDailyModifiers CalculateBranchEffects()
+    {
+        StudentDailyModifiers mods = new StudentDailyModifiers();
+        TeacherManager teacherManager = FindObjectOfType<TeacherManager>(true);
+        if (teacherManager == null) return mods;
+
+        // Aynı branşın etkisinin 1'den fazla kez uygulanmasını engellemek için HashSet kullanıyoruz
+        HashSet<TeacherBranch> appliedBranches = new HashSet<TeacherBranch>();
+
+        foreach (Teacher t in teacherManager.activeTeachers)
+        {
+            if (appliedBranches.Contains(t.branch)) continue; // Zaten bu branşın etkisini uyguladıysak atla
+            appliedBranches.Add(t.branch);
+
+            switch (t.branch)
             {
-                candidateManager.GenerateNewCandidate();
+                case TeacherBranch.Matematik:
+                    mods.IncomeMultiplier *= 2.0f;
+                    mods.ExtraEnergyDecay += 30;
+                    break;
+                case TeacherBranch.Fizik:
+                    mods.IncomeMultiplier *= 2.5f;
+                    mods.ExtraSanityDecay += 35;
+                    break;
+                case TeacherBranch.Kimya:
+                    mods.IncomeMultiplier *= 1.2f;
+                    mods.ToxicityIncreaseMultiplier *= 0.7f;
+                    break;
+                case TeacherBranch.Biyoloji:
+                    mods.IncomeMultiplier *= 1.5f;
+                    mods.EnergyDecayReduction += 10;
+                    // TODO: İleride Bünye (Physique) statı için pasif bir buff (hastalık direnci vb.) buraya eklenecek.
+                    break;
+                case TeacherBranch.Edebiyat:
+                    mods.IncomeMultiplier *= 1.5f;
+                    mods.ExtraSanityDecay += 15;
+                    break;
+                case TeacherBranch.Tarih:
+                    mods.IncomeMultiplier *= 1.2f;
+                    mods.LoyaltyBonus += 15;
+                    break;
+                case TeacherBranch.Cografya:
+                    mods.IncomeMultiplier *= 1.0f;
+                    mods.PreventStatDecay = true;
+                    break;
+                case TeacherBranch.Felsefe:
+                    mods.IsIncomeZero = true;
+                    mods.SanityBonus += 40;
+                    break;
             }
         }
+        return mods;
     }
 
     // --- NEWLY ADDED PANEL FUNCTIONS START HERE ---
