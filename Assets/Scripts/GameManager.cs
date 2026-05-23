@@ -65,11 +65,7 @@ public class GameManager : MonoBehaviour
         if (isGameOver) return;
 
         currentDay++;
-
-        money += (studentCount * 100);
-        money -= secretLabExpense;
-
-        studentCount += (successRate / 10);
+        money -= secretLabExpense; // Sabit laboratuvar masrafı
 
         if (suspicionLevel > 0)
         {
@@ -77,32 +73,63 @@ public class GameManager : MonoBehaviour
             if (suspicionLevel < 0) suspicionLevel = 0;
         }
 
+        // --- YENİ SİSTEM: HASAT VAKTİ VE EZİYET ---
+        int totalIncomeForToday = 0;
+
+        foreach (Student kid in enrolledStudents)
+        {
+            // 1. Kasa Kazancı: (Cüzdan + Zeka). Oyun ekonomisi anlamlı olsun diye 50 ile çarpılıyor.
+            int dailyIncome = (kid.intelligence + kid.wealth) * 50;
+            totalIncomeForToday += dailyIncome;
+            kid.incomeContribution = dailyIncome;
+
+            // 2. Eziyet (Mentalite ve Enerji Düşüşü)
+            // Sabit 20 puan düşüş istedin. İrade (1-10) statı bu düşüşü engeller. 
+            // İrade 10 ise 10 düşer, 1 ise 19 düşer.
+            int decay = 20 - kid.willpower;
+            if (decay < 0) decay = 0;
+
+            kid.energy -= decay;
+            kid.sanity -= decay;
+
+            // 3. Detoks (Toksisite Temizliği)
+            if (kid.toxicity > 0)
+            {
+                kid.toxicity -= 10;
+            }
+
+            // 4. Matematiksel Sınırlar (Mathf.Clamp)
+            kid.energy = Mathf.Clamp(kid.energy, 0, 100);
+            kid.sanity = Mathf.Clamp(kid.sanity, 0, 100);
+            kid.toxicity = Mathf.Clamp(kid.toxicity, 0, 100);
+            kid.loyalty = Mathf.Clamp(kid.loyalty, 0, 100);
+        }
+        
+        money += totalIncomeForToday;
+
         if (money <= 0)
         {
-            moneyText.text = "BANKRUPT!";
+            if (moneyText != null) moneyText.text = "BANKRUPT!";
             isGameOver = true;
             return;
         }
 
-        waitingCandidates.Clear();
-        for (int i = 0; i < 3; i++)
-        {
-            waitingCandidates.Add(new Student(successRate));
-        }
-
-        foreach (Student student in enrolledStudents)
-        {
-            money += student.incomeContribution;
-        }
-
-        // NEW: Open the panel to show candidates at the door when the day ends
-        if (candidatePanel != null)
-        {
-            candidatePanel.SetActive(true);
-            ShowNextCandidate();
-        }
-
         UpdateUI();
+
+        // 5. Öğrenci Listesi UI'ını tetikle
+        UpdateStudentList();
+        
+        // Ertesi gün için mülakat panelinin aday limitini sıfırla
+        CandidateManager candidateManager = FindObjectOfType<CandidateManager>();
+        if(candidateManager != null)
+        {
+            candidateManager.candidatesLeftToday = 3;
+            // Eğer o an panel açıksa ve ekranda eski aday varsa yenilesin
+            if (candidateManager.gameObject.activeInHierarchy)
+            {
+                candidateManager.GenerateNewCandidate();
+            }
+        }
     }
 
     // --- NEWLY ADDED PANEL FUNCTIONS START HERE ---
@@ -216,7 +243,8 @@ public class GameManager : MonoBehaviour
     {
         // Eski manuel TextMeshPro arama sistemi İPTAL. 
         // Artık otonom StudentsListManager bu işi devraldı.
-        StudentsListManager listManager = FindObjectOfType<StudentsListManager>();
+        // true parametresi panel kapalıyken bile (örneğin End Day'e basıldığında) scripti bulmasını sağlar
+        StudentsListManager listManager = FindObjectOfType<StudentsListManager>(true);
         if (listManager != null)
         {
             listManager.RefreshList();
